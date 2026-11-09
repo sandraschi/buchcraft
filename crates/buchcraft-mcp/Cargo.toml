@@ -1,0 +1,21 @@
+[package]
+name = "buchcraft-mcp"
+description = "buchcraft L2: one binary for the CLI (every verb takes --json) and the MCP stdio server."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "buchcraft"
+path = "src/main.rs"
+
+[dependencies]
+buchcraft-core = { path = "../buchcraft-core" }
+buchcraft-store = { path = "../buchcraft-store" }
+craft-biz.workspace = true
+serde_json.workspace = true
+clap.workspace = true
+
+[lints]
+workspace = true

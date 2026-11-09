@@ -1,0 +1,18 @@
+[package]
+name = "buchcraft-core"
+description = "buchcraft L1: command bus, bank CSV import, bus inbox, demo seed. Shared by CLI, MCP and the desktop app."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+buchcraft-store = { path = "../buchcraft-store" }
+craft-biz.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+csv.workspace = true
+
+[lints]
+workspace = true

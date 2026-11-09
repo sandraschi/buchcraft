@@ -1,0 +1,19 @@
+[package]
+name = "buchcraft-store"
+description = "buchcraft L1 store: append-only double-entry ledger on SQLite (WAL) with Austrian tax keys."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+craft-biz.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+rusqlite.workspace = true
+thiserror.workspace = true
+sha2.workspace = true
+
+[lints]
+workspace = true
