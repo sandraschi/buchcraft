@@ -532,7 +532,7 @@ dependencies = [
 
 [[package]]
 name = "buchcraft-app"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "buchcraft-core",
  "buchcraft-store",
@@ -546,7 +546,7 @@ dependencies = [
 
 [[package]]
 name = "buchcraft-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "buchcraft-store",
  "chrono",
@@ -558,7 +558,7 @@ dependencies = [
 
 [[package]]
 name = "buchcraft-mcp"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "buchcraft-core",
  "buchcraft-store",
@@ -569,7 +569,7 @@ dependencies = [
 
 [[package]]
 name = "buchcraft-store"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "chrono",
  "craft-biz",

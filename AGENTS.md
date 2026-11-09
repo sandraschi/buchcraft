@@ -20,6 +20,15 @@ Austrian double-entry bookkeeping craft app. Read first:
 - Closed months refuse bookings and Storno dates.
 - Money is `craft_biz::Money` (i64 cents). No floats for amounts, ever.
 
+## Docs (keep current in the same commit)
+
+- `README.md`: what it does, quick start, MCP config, build.
+- `HELP.md`: task-oriented how-to; update when a verb or workflow changes.
+- `docs/PRD.md`: purpose, boundaries, honest gaps, next steps; update "Today" and "Gaps" with every release.
+- `docs/TOOLS.md`: generated. After any tool change run `just docs`; the `tools_doc_is_current` test fails otherwise.
+- `CHANGELOG.md`: one entry per change set.
+- CLI help: `about`, argument doc comments and `AFTER_HELP` in the mcp crate's `main.rs`.
+
 ## Rules
 
 - Zero-panic: unwrap/expect/panic/todo/unimplemented denied outside tests.
@@ -42,4 +51,4 @@ Austrian double-entry bookkeeping craft app. Read first:
 3. `cargo fmt --all --check`
 4. MCP probe: `initialize` -> `tools/list` -> `tools/call`, stdout pure JSON
 5. `Cargo.lock` committed, clean `git status`
-6. `CHANGELOG.md` line
+6. `CHANGELOG.md` entry; README / HELP / PRD updated if behaviour changed

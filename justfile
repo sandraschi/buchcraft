@@ -12,6 +12,10 @@ test:
 fmt-check:
     $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo fmt --all --check
 
+# Regenerate docs/TOOLS.md from the tool catalog (LF, no BOM).
+docs:
+    $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; $md = cargo run -q -p buchcraft-mcp -- tools --markdown; [IO.File]::WriteAllText((Join-Path (Get-Location) 'docs\TOOLS.md'), (($md -join "`n").TrimEnd() + "`n"), (New-Object Text.UTF8Encoding $false))
+
 run-mcp:
     $env:Path = "$env:USERPROFILE\\.cargo\\bin;$env:Path"; cargo run -p buchcraft-mcp -- mcp
 

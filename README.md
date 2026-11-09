@@ -8,7 +8,12 @@ Replaces the bookkeeping part of BMD NTCS, RZL, DATEV or sevDesk for a small
 Austrian business. Does **not** file anything with FinanzOnline, is not a
 Registrierkasse (RKSV) and does no payroll.
 
-## What is real in v0.1.0
+- How to use it day to day: [HELP.md](HELP.md)
+- What it is for and where it stops: [docs/PRD.md](docs/PRD.md)
+- Every MCP tool: [docs/TOOLS.md](docs/TOOLS.md) (generated, checked by a test)
+- Changes: [CHANGELOG.md](CHANGELOG.md)
+
+## What is real in v0.2.1
 
 | Feature | State |
 |---|---|
@@ -20,7 +25,7 @@ Registrierkasse (RKSV) and does no payroll.
 | Saldenliste, Kontoblatt, journal | Real. |
 | U30 pre-fill (KZ 000/006/022/029/060/065/070/072/095) | Real computation from booked entries. Not a filing. |
 | Bank CSV import | Real parser with German/English header aliases, dedup on re-import. **Not yet verified against a real George export.** |
-| Drafts from other craft apps (bus) | Real for `asset.depreciation_due`. Drafts book only on approval. |
+| Drafts from other craft apps (bus) | Real for `asset.depreciation_due`, verified end to end with assetcraft (`afa --emit` -> draft -> approve -> booked). Drafts book only on approval. |
 | Demo company | Labelled demo (`demo: true` everywhere), only on an empty ledger. |
 | Desktop app (egui) | Real: overview with KPIs and 6-month chart, bank inbox (pick account + tax key, book), gross booking form with live net/tax preview, journal with Storno, Saldenliste, Kontoblatt, U30 with month close, drafts. De/En, light/dark. No egui_kittest golden snapshots yet. |
 
@@ -77,11 +82,10 @@ Add `--json` to any verb for machine output. Default database:
 ```
 
 File tools (`buch_bank_import`, `buch_export_csv`) only work inside
-`--allow-path` directories in MCP mode. 22 tools; `buchcraft tools` prints the
-catalog. Amounts in tool arguments are DE strings (`"1.200,00"`) or integer
+`--allow-path` directories in MCP mode. 22 tools, listed in [docs/TOOLS.md](docs/TOOLS.md) (`buchcraft tools --markdown`). Amounts in tool arguments are DE strings (`"1.200,00"`) or integer
 `*_cents`; floats are refused.
 
 ## Gates
 
 `just ci` = clippy `-D warnings` (unwrap/expect/panic denied), tests, fmt.
-v0.1.0: 24 tests, live MCP stdio probe verified (stdout pure JSON-RPC).
+v0.2.1: 28 tests (including the docs/TOOLS.md sync test), live MCP stdio probe verified (stdout pure JSON-RPC). `just docs` regenerates docs/TOOLS.md.

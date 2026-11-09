@@ -14,8 +14,17 @@ use serde_json::{json, Map, Value};
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+const AFTER_HELP: &str = "Typical month:
+  buchcraft gross --date 05.11.2026 --kreis ER --account 7600 --contra 2800 --gross \"120,00\" --tax-key V20 \"Büromaterial\"
+  buchcraft bank import D:\\Bank\\george.csv      # then: bank unmatched, bank book
+  buchcraft inbox-drain; buchcraft drafts list  # AfA drafts from assetcraft
+  buchcraft u30 2026-11                         # UVA pre-fill
+  buchcraft balance --from 2026-01-01 --to 2026-11-30
+  buchcraft close-month 2026-11
+See HELP.md for workflows and docs/TOOLS.md for every MCP tool.";
+
 #[derive(Parser)]
-#[command(
+#[command(after_help = AFTER_HELP,
     name = "buchcraft",
     version,
     about = "Austrian double-entry bookkeeping (EKR, U30 pre-fill), local-first. CLI + MCP."
@@ -129,8 +138,11 @@ enum Cmd {
     },
     /// Fill an empty ledger with the labelled demo company.
     DemoSeed,
-    /// Print the MCP tool catalog.
-    Tools,
+    /// Print the MCP tool catalog (JSON, or markdown for docs/TOOLS.md).
+    Tools {
+        #[arg(long)]
+        markdown: bool,
+    },
     /// Run the MCP stdio server.
     Mcp,
 }
@@ -333,7 +345,7 @@ fn to_tool(cmd: Cmd) -> Result<(&'static str, Value), String> {
             json!({ "from": from, "to": to, "path": path }),
         ),
         Cmd::DemoSeed => ("buch_demo_seed", json!({})),
-        Cmd::Tools | Cmd::Mcp => return Err("not a tool verb".into()),
+        Cmd::Tools { .. } | Cmd::Mcp => return Err("not a tool verb".into()),
     })
 }
 
@@ -411,7 +423,11 @@ fn scalar(v: &Value) -> String {
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
-    if matches!(cli.cmd, Cmd::Tools) {
+    if let Cmd::Tools { markdown } = cli.cmd {
+        if markdown {
+            print!("{}", craft_biz::mcp::tools_markdown(APP, &tools()));
+            return ExitCode::SUCCESS;
+        }
         println!(
             "{}",
             serde_json::to_string_pretty(&tools()).unwrap_or_default()
@@ -483,6 +499,15 @@ fn main() -> ExitCode {
 mod tests {
     use super::*;
     use craft_biz::mcp::handle_line;
+
+    #[test]
+    fn tools_doc_is_current() {
+        let committed = include_str!("../../../docs/TOOLS.md");
+        assert!(
+            craft_biz::mcp::docs_in_sync(committed, &craft_biz::mcp::tools_markdown(APP, &tools())),
+            "docs/TOOLS.md is stale: run `just docs`"
+        );
+    }
 
     fn host() -> Host {
         let ledger = Ledger::open_in_memory().unwrap();
