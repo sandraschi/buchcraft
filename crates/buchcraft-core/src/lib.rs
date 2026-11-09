@@ -17,61 +17,12 @@ use craft_biz::ekr::{AccountKind, TaxKey};
 use craft_biz::mcp::tool;
 use craft_biz::Money;
 use serde_json::{json, Value};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 pub const APP: &str = "buchcraft";
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// File-system roots the file-touching commands may use. `None` = unrestricted
-/// (interactive CLI); `Some(empty)` = no file access (MCP without --allow-path).
-#[derive(Debug, Clone, Default)]
-pub struct Confinement(pub Option<Vec<PathBuf>>);
-
-impl Confinement {
-    pub fn roots(paths: &[PathBuf]) -> Result<Confinement, String> {
-        let mut out = Vec::new();
-        for p in paths {
-            out.push(
-                p.canonicalize()
-                    .map_err(|e| format!("--allow-path {}: {e}", p.display()))?,
-            );
-        }
-        Ok(Confinement(Some(out)))
-    }
-
-    /// Resolve `path` for reading (must exist) or writing (parent must exist),
-    /// refusing anything outside the allowed roots.
-    pub fn check(&self, path: &str, write: bool) -> Result<PathBuf, String> {
-        if path.trim().is_empty() || path.len() > 1024 {
-            return Err("path empty or too long".into());
-        }
-        let p = Path::new(path);
-        let resolved = if write {
-            let name = p.file_name().ok_or("path has no file name")?;
-            let parent = match p.parent() {
-                Some(d) if !d.as_os_str().is_empty() => d.to_path_buf(),
-                _ => PathBuf::from("."),
-            };
-            parent
-                .canonicalize()
-                .map_err(|e| format!("{}: {e}", parent.display()))?
-                .join(name)
-        } else {
-            p.canonicalize().map_err(|e| format!("{path}: {e}"))?
-        };
-        match &self.0 {
-            None => Ok(resolved),
-            Some(roots) if roots.iter().any(|r| resolved.starts_with(r)) => Ok(resolved),
-            Some(roots) if roots.is_empty() => {
-                Err("file access disabled: start the MCP server with --allow-path <DIR>".into())
-            }
-            Some(_) => Err(format!(
-                "{} is outside the allowed paths",
-                resolved.display()
-            )),
-        }
-    }
-}
+pub use craft_biz::confine::Confinement;
 
 pub struct Ctx {
     pub ledger: Ledger,
