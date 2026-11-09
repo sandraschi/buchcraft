@@ -1322,6 +1322,19 @@ impl Ledger {
         Ok(())
     }
 
+    /// Earliest and latest entry date, if any entries exist.
+    pub fn entry_date_span(&self) -> Result<Option<(NaiveDate, NaiveDate)>> {
+        let row: (Option<String>, Option<String>) = self.conn.query_row(
+            "SELECT MIN(entry_date), MAX(entry_date) FROM entries",
+            [],
+            |r| Ok((r.get(0)?, r.get(1)?)),
+        )?;
+        match row {
+            (Some(a), Some(b)) => Ok(Some((s2d(&a)?, s2d(&b)?))),
+            _ => Ok(None),
+        }
+    }
+
     /// Counts for the status tool.
     pub fn stats(&self) -> Result<serde_json::Value> {
         let q = |sql: &str| -> Result<i64> { Ok(self.conn.query_row(sql, [], |r| r.get(0))?) };

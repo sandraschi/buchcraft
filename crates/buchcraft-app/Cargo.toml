@@ -1,0 +1,24 @@
+[package]
+name = "buchcraft-app"
+description = "buchcraft L3: native egui desktop app calling the L1 command bus in-process."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "buchcraft-app"
+path = "src/main.rs"
+
+[dependencies]
+buchcraft-core = { path = "../buchcraft-core" }
+buchcraft-store = { path = "../buchcraft-store" }
+craft-biz.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+eframe = "0.37"
+egui = "0.37"
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[lints]
+workspace = true

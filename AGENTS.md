@@ -9,7 +9,7 @@ Austrian double-entry bookkeeping craft app. Read first:
 - `crates/buchcraft-store` (L1): ledger on SQLite WAL. All accounting invariants live here.
 - `crates/buchcraft-core` (L1): `Command` bus, `dispatch`, MCP catalog, bank CSV parser, bus inbox, demo seed.
 - `crates/buchcraft-mcp` (L2): `buchcraft` binary. CLI verbs map onto the same tool calls as MCP.
-- `crates/buchcraft-app` (L3, egui): not built yet.
+- `crates/buchcraft-app` (L3, egui 0.37): `buchcraft-app` window. Mutations go through `dispatch` (same path as CLI/MCP); reads use the typed ledger API. `--smoke` and `--screenshot PATH --view NAME` for headless checks.
 - Shared kernel: `../craft-biz` (money, AT validators, EKR, bus, MCP loop).
 
 ## Accounting invariants (never weaken)

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0 - 2026-11-09
+
+- `buchcraft-app` egui desktop app: overview (KPIs, 6-month revenue/expense chart), bank inbox booking, gross booking form, journal with Storno, Saldenliste, Kontoblatt, U30 with month close, drafts. De/En, light/dark, `--smoke`, `--screenshot`.
+- EKR seed names and UI use real umlauts; demo company opens Kassa with 500,00.
+- 27 tests.
+
 ## 0.1.0 - 2026-11-09
 
 - Tier 1: ledger store (balanced entries, engine-generated VAT lines, SQLite immutability triggers, Storno, month close), Saldenliste, Kontoblatt, U30 pre-fill, bank CSV import with dedup, bus drafts, demo company.

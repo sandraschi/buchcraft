@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# buchcraft launcher: builds if needed, shows ledger status. The desktop app (egui) comes in Phase 2.
+# buchcraft launcher: builds the CLI and the desktop app, then opens the window.
 $ErrorActionPreference = 'Stop'
 $env:Path = "$env:USERPROFILE\.cargo\bin;$env:Path"
 if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
@@ -8,11 +8,9 @@ if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
 }
 if (-not $env:CARGO_TARGET_DIR) { $env:CARGO_TARGET_DIR = 'D:\Dev\cargo-target' }
 Set-Location $PSScriptRoot
-cargo build --release -p buchcraft-mcp
+cargo build --release -p buchcraft-mcp -p buchcraft-app
 if ($LASTEXITCODE -ne 0) { exit 1 }
-$exe = Join-Path $env:CARGO_TARGET_DIR 'release\buchcraft.exe'
-& $exe status
-if ($LASTEXITCODE -ne 0) { exit 1 }
-Write-Host ''
-Write-Host "[buchcraft] binary: $exe"
-Write-Host '[buchcraft] try: buchcraft --help, buchcraft u30 2026-10, buchcraft mcp --allow-path <DIR>'
+$app = Join-Path $env:CARGO_TARGET_DIR 'release\buchcraft-app.exe'
+Start-Process -FilePath $app
+Write-Host "[buchcraft] window started: $app"
+Write-Host '[buchcraft] empty ledger? click Demo-Firma laden on the overview.'

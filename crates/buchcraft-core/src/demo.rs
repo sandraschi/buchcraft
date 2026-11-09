@@ -51,10 +51,11 @@ pub fn seed(l: &mut Ledger) -> Result<Value, String> {
     book(
         d(1)?,
         Kreis::SO,
-        "Eroeffnung Kapital",
+        "Eröffnung Kapital",
         vec![
             line(2800, "10.000,00", None)?,
-            line(9000, "-10.000,00", None)?,
+            line(2700, "500,00", None)?,
+            line(9000, "-10.500,00", None)?,
         ],
     )?;
     book(
@@ -96,7 +97,7 @@ pub fn seed(l: &mut Ledger) -> Result<Value, String> {
     book(
         d(9)?,
         Kreis::ER,
-        "Fachbuecher (10%)",
+        "Fachbücher (10%)",
         vec![
             line(7600, "80,00", Some(TaxKey::V10))?,
             line(2700, "-88,00", None)?,

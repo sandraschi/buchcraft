@@ -22,7 +22,20 @@ Registrierkasse (RKSV) and does no payroll.
 | Bank CSV import | Real parser with German/English header aliases, dedup on re-import. **Not yet verified against a real George export.** |
 | Drafts from other craft apps (bus) | Real for `asset.depreciation_due`. Drafts book only on approval. |
 | Demo company | Labelled demo (`demo: true` everywhere), only on an empty ledger. |
-| Desktop app (egui) | Not built yet (Phase 2). |
+| Desktop app (egui) | Real: overview with KPIs and 6-month chart, bank inbox (pick account + tax key, book), gross booking form with live net/tax preview, journal with Storno, Saldenliste, Kontoblatt, U30 with month close, drafts. De/En, light/dark. No egui_kittest golden snapshots yet. |
+
+## Desktop app
+
+```powershell
+.\start.bat                       # builds and opens the window
+buchcraft-app --db .\demo.db --lang de --view bank
+buchcraft-app --smoke             # headless status check, no window
+buchcraft-app --view u30 --screenshot u30.png   # render one PNG and exit
+```
+
+![Overview](docs/screenshots/overview.png)
+![Bank inbox](docs/screenshots/bank.png)
+![U30](docs/screenshots/u30.png)
 
 ## Quick start
 
