@@ -44,3 +44,21 @@ Austrian double-entry bookkeeping (Einnahmen-Ausgaben is not the model; this is 
 1. Verify the bank importer with one real George export.
 2. egui_kittest snapshots for the 8 views; right-align amount columns.
 3. Steuerberater review of the seed chart and U30 mapping.
+
+## UI/UX Architecture & Menu Bar Standard
+
+In accordance with [`CRAFT_MENU_BAR_STANDARD.md`](../../mcp-central-docs/standards/rust-artcraft/CRAFT_MENU_BAR_STANDARD.md):
+- **Pattern 2 (Viewport-Centric Craft Workstation):** Persistent double-entry journal matrix and ledger account viewport with EKR chart navigation. Top quick button row acts as accelerators into the `View` menu. To add a new booking view or tax report:
+  1. Register a visibility toggle in the `View` or `Window` menu.
+  2. Add an entry in the sidebar Account / Filter toolbox.
+  3. Wire the action directly into the universal `Command::dispatch` bus.
+- **Top Menu Bar Hierarchy:**
+  - `File`: New Ledger (`Ctrl+N`), Open Ledger (`Ctrl+O`), Open Recent ▸, Save (`Ctrl+S`), Export Saldenliste / Journal / U30 (`Ctrl+E`), Close Ledger (`Ctrl+W`), Quit (`Ctrl+Q`).
+  - `Edit`: Undo (`Ctrl+Z`), Redo (`Ctrl+Y`), Cut, Copy, Paste, Select All, Preferences (`Ctrl+,`).
+  - `View`: Journal Table, Account Sheets (Kontoblätter), Saldenliste, UVA / U30 Cockpit, Drafts Inbox, Theme (`Dark`/`Light`).
+  - `Insert`: Add Journal Entry (`Ctrl+Shift+J`), Add Account, Import Bank CSV, Ingest Asset Draft.
+  - `Modify`: Storno Booking, Edit Account Name, Adjust Tax Keys, Reconcile Bank Lines.
+  - `Commands`: Calculate UVA Kennzahlen, Close Month, Audit Ledger Invariants, Backup Database.
+  - `Window`: Reset Layout, Journal Viewport, Account Inspector, Cross-App Bus Signals.
+  - `Help` (Mandatory 5-Dialog Suite): `Command Palette...` (`Ctrl+K`), `Keyboard Shortcuts...` (`F1`), `Project Files & Docs...`, `Licenses & Notices...`, `About BuchCraft`.
+- **Behavioral Mechanics:** Smooth `switch_on_hover` between top-level menus, zero-unsafe immediate-mode rendering, and headless `--smoke` parity.
