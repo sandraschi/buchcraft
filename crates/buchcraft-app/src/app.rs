@@ -1588,7 +1588,6 @@ mod tests {
     use buchcraft_core::Confinement;
     use buchcraft_store::Ledger;
     use craft_biz::bus::Bus;
-    use craft_biz_ui::bookend::{self, Bar, Spec};
 
     fn app() -> BuchApp {
         let ctx = Ctx {
