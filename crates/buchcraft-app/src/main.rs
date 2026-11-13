@@ -82,6 +82,12 @@ fn main() -> ExitCode {
     if args.smoke {
         return match dispatch(&mut ctx, Command::Status) {
             Ok(v) => {
+                if let Err(e) =
+                    craft_biz_ui::bookend::smoke("BuchCraft", env!("CARGO_PKG_VERSION"), "ledger")
+                {
+                    eprintln!("buchcraft-app smoke: menu: {e}");
+                    return ExitCode::FAILURE;
+                }
                 println!("{v}");
                 ExitCode::SUCCESS
             }

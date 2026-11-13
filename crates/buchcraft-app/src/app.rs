@@ -9,6 +9,7 @@ use craft_biz::deadline::month_end;
 use craft_biz::ekr::{AccountKind, TaxKey};
 use craft_biz::i18n::Locale;
 use craft_biz::Money;
+use craft_biz_ui::bookend::{self, Bar, Spec};
 use eframe::egui::{self, Color32, ColorImage, RichText};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -279,6 +280,8 @@ pub struct BuchApp {
     pending: Vec<Action>,
     pub shot: Option<Shot>,
     frame: u64,
+    bar: Bar,
+    zoom: f32,
 }
 
 impl BuchApp {
@@ -317,6 +320,8 @@ impl BuchApp {
             close_confirm: false,
             pending: Vec::new(),
             shot: None,
+            bar: Bar::new(),
+            zoom: 1.0,
             frame: 0,
         };
         app.reload();
@@ -1490,6 +1495,31 @@ fn trend_chart(ui: &mut egui::Ui, trend: &[(String, Money, Money)]) {
     );
 }
 
+impl BuchApp {
+    fn paint_menu(&mut self, ui: &mut egui::Ui) {
+        let docs = bookend::repo_docs(env!("CARGO_MANIFEST_DIR"));
+        let spec = Spec {
+            name: "BuchCraft",
+            version: env!("CARGO_PKG_VERSION"),
+            description: "The ledger, the bank inbox, and the VAT worksheet.",
+            repository: "https://github.com/sandraschi/buchcraft",
+            docs: &docs,
+            dark: self.dark,
+            zoom: self.zoom,
+            file: Vec::new(),
+            view: Vec::new(),
+            middle: Vec::new(),
+        };
+        let change = self.bar.show(ui, &spec);
+        if let Some(dark) = change.dark {
+            self.dark = dark;
+        }
+        if let Some(zoom) = change.zoom {
+            self.zoom = zoom;
+        }
+    }
+}
+
 impl eframe::App for BuchApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         self.frame += 1;
@@ -1502,6 +1532,7 @@ impl eframe::App for BuchApp {
             egui::Visuals::light()
         });
 
+        self.paint_menu(ui);
         egui::Panel::top("buch_top").show(ui, |ui| {
             ui.add_space(4.0);
             self.top_bar(ui);
@@ -1557,6 +1588,7 @@ mod tests {
     use buchcraft_core::Confinement;
     use buchcraft_store::Ledger;
     use craft_biz::bus::Bus;
+    use craft_biz_ui::bookend::{self, Bar, Spec};
 
     fn app() -> BuchApp {
         let ctx = Ctx {
