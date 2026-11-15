@@ -27,3 +27,4 @@ is out of date. Every tool is also a CLI verb (`buchcraft --help`). Dotted names
 | `buch_inbox_drain` | Read events from other craft apps (e.g. assetcraft depreciation) and turn them into drafts. | - | - |
 | `buch_export_csv` | Export journal lines as semicolon CSV (DE format). Needs --allow-path. | `from`, `to`, `path` | - |
 | `buch_demo_seed` | Fill an EMPTY ledger with a labelled demo company (October 2026). | - | - |
+| `buch_skill_read` | Read a bundled BuchCraft domain skill (SKILL.md) by name. | `name` | - |
