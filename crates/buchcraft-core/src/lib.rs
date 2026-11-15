@@ -8,6 +8,8 @@
 
 pub mod bankcsv;
 pub mod demo;
+pub mod llm;
+pub mod skills;
 
 use buchcraft_store::{BuchError, EntryInput, Kreis, Ledger, LineInput};
 use chrono::NaiveDate;
@@ -109,6 +111,9 @@ pub enum Command {
         path: String,
     },
     DemoSeed,
+    SkillRead {
+        name: String,
+    },
 }
 
 // ---------- argument helpers (hostile input fence) ----------
@@ -265,6 +270,9 @@ impl Command {
                 path: s(a, "path")?.to_string(),
             },
             "buch_demo_seed" => Command::DemoSeed,
+            "buch_skill_read" => Command::SkillRead {
+                name: s(a, "name")?.to_string(),
+            },
             other => return Err(format!("unknown tool {other}")),
         })
     }
@@ -374,6 +382,7 @@ pub fn dispatch(ctx: &mut Ctx, cmd: Command) -> Result<Value, String> {
             Ok(json!({ "path": p.display().to_string(), "lines": n }))
         }
         Command::DemoSeed => demo::seed(&mut ctx.ledger),
+        Command::SkillRead { name } => skills::skill_read(&name),
     }
 }
 
@@ -531,6 +540,7 @@ pub fn tools() -> Vec<Value> {
         tool("buch_inbox_drain", "Read events from other craft apps (e.g. assetcraft depreciation) and turn them into drafts.", json!({}), &[]),
         tool("buch_export_csv", "Export journal lines as semicolon CSV (DE format). Needs --allow-path.", json!({ "from": {"type":"string"}, "to": {"type":"string"}, "path": {"type":"string"} }), &["from", "to", "path"]),
         tool("buch_demo_seed", "Fill an EMPTY ledger with a labelled demo company (October 2026).", json!({}), &[]),
+        tool("buch_skill_read", "Read a bundled BuchCraft domain skill (SKILL.md) by name.", json!({ "name": { "type": "string" } }), &["name"]),
     ]
 }
 

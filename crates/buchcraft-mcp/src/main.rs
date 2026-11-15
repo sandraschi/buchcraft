@@ -143,8 +143,20 @@ enum Cmd {
         #[arg(long)]
         markdown: bool,
     },
+    /// Inspect or export bundled domain skills.
+    Skills {
+        #[command(subcommand)]
+        op: SkillsOp,
+    },
     /// Run the MCP stdio server.
     Mcp,
+}
+
+#[derive(Subcommand)]
+enum SkillsOp {
+    List,
+    Show { name: String },
+    Export { dir: PathBuf },
 }
 
 #[derive(Subcommand)]
@@ -345,7 +357,7 @@ fn to_tool(cmd: Cmd) -> Result<(&'static str, Value), String> {
             json!({ "from": from, "to": to, "path": path }),
         ),
         Cmd::DemoSeed => ("buch_demo_seed", json!({})),
-        Cmd::Tools { .. } | Cmd::Mcp => return Err("not a tool verb".into()),
+        Cmd::Tools { .. } | Cmd::Skills { .. } | Cmd::Mcp => return Err("not a tool verb".into()),
     })
 }
 
@@ -366,6 +378,18 @@ impl ToolHost for Host {
     fn call(&mut self, name: &str, args: &Value) -> Result<Value, String> {
         let cmd = Command::from_tool(name, args)?;
         dispatch(&mut self.ctx, cmd)
+    }
+    fn resources(&self) -> Vec<Value> {
+        buchcraft_core::skills::mcp_resources()
+    }
+    fn read_resource(&self, uri: &str) -> Result<Vec<Value>, String> {
+        let s = buchcraft_core::skills::skill_by_uri(uri)
+            .ok_or_else(|| format!("unknown resource: {uri}"))?;
+        Ok(vec![json!({
+            "uri": s.uri,
+            "mimeType": "text/markdown",
+            "text": s.content,
+        })])
     }
 }
 
@@ -433,6 +457,57 @@ fn main() -> ExitCode {
             serde_json::to_string_pretty(&tools()).unwrap_or_default()
         );
         return ExitCode::SUCCESS;
+    }
+    if let Cmd::Skills { op } = &cli.cmd {
+        match op {
+            SkillsOp::List => {
+                let list = buchcraft_core::skills::skills_list();
+                if cli.json {
+                    println!(
+                        "{}",
+                        serde_json::to_string_pretty(&list).unwrap_or_default()
+                    );
+                } else {
+                    for s in list {
+                        println!("{}\t{}\t({} B)", s.name, s.uri, s.bytes);
+                    }
+                }
+                return ExitCode::SUCCESS;
+            }
+            SkillsOp::Show { name } => match buchcraft_core::skills::skill_read(name) {
+                Ok(v) => {
+                    if cli.json {
+                        println!("{}", serde_json::to_string_pretty(&v).unwrap_or_default());
+                    } else if let Some(txt) = v["content"].as_str() {
+                        print!("{txt}");
+                    }
+                    return ExitCode::SUCCESS;
+                }
+                Err(e) => {
+                    eprintln!("buchcraft: {e}");
+                    return ExitCode::FAILURE;
+                }
+            },
+            SkillsOp::Export { dir } => match buchcraft_core::skills::export_skills(dir) {
+                Ok(paths) => {
+                    if cli.json {
+                        println!(
+                            "{}",
+                            serde_json::to_string_pretty(&paths).unwrap_or_default()
+                        );
+                    } else {
+                        for p in paths {
+                            println!("exported {p}");
+                        }
+                    }
+                    return ExitCode::SUCCESS;
+                }
+                Err(e) => {
+                    eprintln!("buchcraft: {e}");
+                    return ExitCode::FAILURE;
+                }
+            },
+        }
     }
     let db = cli.db.clone().unwrap_or_else(default_db);
     let ledger = match Ledger::open(&db) {

@@ -1,6 +1,8 @@
 //! BuchCraft desktop app (L3). Mutations go through `buchcraft_core::dispatch`
 //! (the same path as CLI and MCP); reads use the typed ledger API directly.
 
+use crate::chat_dock::ChatDockState;
+use crate::settings_view::{ui_llm_settings, SettingsState};
 use buchcraft_core::{dispatch, Command, Ctx};
 use buchcraft_store::{Account, Balances, BankTx, Draft, Entry, Kreis, LedgerRow, U30Report};
 use chrono::{Datelike, Local, NaiveDate};
@@ -25,10 +27,11 @@ pub enum View {
     AccountLedger,
     U30,
     Drafts,
+    LlmSettings,
 }
 
 impl View {
-    pub const ALL: [View; 8] = [
+    pub const ALL: [View; 9] = [
         View::Overview,
         View::BankInbox,
         View::NewEntry,
@@ -37,6 +40,7 @@ impl View {
         View::AccountLedger,
         View::U30,
         View::Drafts,
+        View::LlmSettings,
     ];
 
     pub fn parse(s: &str) -> Option<View> {
@@ -49,6 +53,7 @@ impl View {
             "ledger" => Some(View::AccountLedger),
             "u30" => Some(View::U30),
             "drafts" => Some(View::Drafts),
+            "settings" | "llm" => Some(View::LlmSettings),
             _ => None,
         }
     }
@@ -106,6 +111,7 @@ impl View {
                     "Drafts"
                 }
             }
+            View::LlmSettings => "LLM & Settings",
         }
     }
 }
@@ -282,6 +288,8 @@ pub struct BuchApp {
     frame: u64,
     bar: Bar,
     zoom: f32,
+    chat: ChatDockState,
+    settings: SettingsState,
 }
 
 impl BuchApp {
@@ -323,6 +331,8 @@ impl BuchApp {
             bar: Bar::new(),
             zoom: 1.0,
             frame: 0,
+            chat: ChatDockState::default(),
+            settings: SettingsState::default(),
         };
         app.reload();
         app
@@ -627,6 +637,12 @@ impl BuchApp {
                     });
             }
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                if ui
+                    .selectable_label(self.chat.open, "Chat (Ctrl+J)")
+                    .clicked()
+                {
+                    self.chat.open = !self.chat.open;
+                }
                 if ui
                     .button(if self.dark {
                         self.t("Hell", "Light")
@@ -1520,16 +1536,65 @@ impl BuchApp {
     }
 }
 
+fn harsh_visuals() -> egui::Visuals {
+    let mut visuals = egui::Visuals::dark();
+    let ink = egui::Color32::from_rgb(242, 246, 252);
+    visuals.override_text_color = Some(ink);
+    visuals.weak_text_color = Some(egui::Color32::from_rgb(203, 213, 225));
+    visuals.widgets.noninteractive.fg_stroke = egui::Stroke::new(1.0, ink);
+    visuals.widgets.inactive.fg_stroke = egui::Stroke::new(1.0, ink);
+    visuals.widgets.hovered.fg_stroke = egui::Stroke::new(1.5, egui::Color32::WHITE);
+    visuals.widgets.active.fg_stroke = egui::Stroke::new(1.5, egui::Color32::WHITE);
+    visuals
+}
+
+fn crisp_light_visuals() -> egui::Visuals {
+    let mut visuals = egui::Visuals::light();
+    let ink = egui::Color32::BLACK;
+    visuals.override_text_color = Some(ink);
+    visuals.weak_text_color = Some(ink);
+    visuals.panel_fill = egui::Color32::WHITE;
+    visuals.window_fill = egui::Color32::WHITE;
+    visuals.extreme_bg_color = egui::Color32::WHITE;
+    visuals.faint_bg_color = egui::Color32::WHITE;
+    visuals.widgets.noninteractive.fg_stroke = egui::Stroke::new(1.0, ink);
+    visuals.widgets.inactive.fg_stroke = egui::Stroke::new(1.0, ink);
+    visuals.widgets.hovered.fg_stroke = egui::Stroke::new(1.5, ink);
+    visuals.widgets.active.fg_stroke = egui::Stroke::new(1.5, ink);
+    visuals.widgets.open.fg_stroke = egui::Stroke::new(1.0, ink);
+    visuals
+}
+
 impl eframe::App for BuchApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         self.frame += 1;
+        if ui.input(|i| i.modifiers.ctrl && i.key_pressed(egui::Key::J)) {
+            self.chat.open = !self.chat.open;
+        }
+        if self.chat.busy || self.settings.scanning || self.settings.testing {
+            ui.ctx().request_repaint();
+        }
+        let active_view_label = self.view.label(self.locale);
+        let mut mutated_by_chat = false;
+        self.chat.poll(&mut self.ctx, active_view_label, || {
+            mutated_by_chat = true;
+        });
+        self.settings.poll(&mut self.chat);
+        if self.chat.open_settings_requested {
+            self.chat.open_settings_requested = false;
+            self.chat.maximized = false;
+            self.view = View::LlmSettings;
+        }
+        if mutated_by_chat {
+            self.dirty = true;
+        }
         if self.dirty {
             self.reload();
         }
         ui.ctx().set_visuals(if self.dark {
-            egui::Visuals::dark()
+            harsh_visuals()
         } else {
-            egui::Visuals::light()
+            crisp_light_visuals()
         });
 
         self.paint_menu(ui);
@@ -1563,6 +1628,24 @@ impl eframe::App for BuchApp {
         egui::Panel::left("buch_nav")
             .min_size(190.0)
             .show(ui, |ui| self.nav(ui));
+        if self.chat.open {
+            let max_w = if self.chat.maximized { 760.0 } else { 480.0 };
+            let default_w = if self.chat.maximized { 620.0 } else { 360.0 };
+            let mut mutated = false;
+            egui::Panel::right("buch_chat_dock")
+                .default_size(default_w)
+                .min_size(280.0)
+                .max_size(max_w)
+                .resizable(true)
+                .show(ui, |ui| {
+                    self.chat.ui(ui, &mut self.ctx, active_view_label, || {
+                        mutated = true;
+                    });
+                });
+            if mutated {
+                self.dirty = true;
+            }
+        }
         egui::CentralPanel::default().show(ui, |ui| match self.view {
             View::Overview => self.view_overview(ui),
             View::BankInbox => self.view_bank(ui),
@@ -1572,6 +1655,7 @@ impl eframe::App for BuchApp {
             View::AccountLedger => self.view_account_ledger(ui),
             View::U30 => self.view_u30(ui),
             View::Drafts => self.view_drafts(ui),
+            View::LlmSettings => ui_llm_settings(ui, &mut self.settings, &mut self.chat),
         });
 
         let actions = std::mem::take(&mut self.pending);

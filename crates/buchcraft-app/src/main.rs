@@ -6,6 +6,8 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
 mod app;
+mod chat_dock;
+mod settings_view;
 
 use app::{BuchApp, MonthSel, Shot, View};
 use buchcraft_core::{dispatch, Command, Confinement, Ctx};
