@@ -102,7 +102,7 @@ pub fn ui_llm_settings(ui: &mut Ui, st: &mut SettingsState, chat: &mut ChatDockS
     ui.heading("LLM & Chat Einstellungen (Discovery, BYOK & Agentic DE)");
     ui.label(
         RichText::new(
-            "Kein blindes 'llama3' — scannt echte lokale Modelle (Ollama / LM Studio), nutzt Env-Keys oder BYOK, und zeigt die MCP-Anbindung für Agentic IDEs.",
+            "Kein blindes 'llama3' - scannt echte lokale Modelle (Ollama / LM Studio), nutzt Env-Keys oder BYOK, und zeigt die MCP-Anbindung für Agentic IDEs.",
         )
         .weak(),
     );
@@ -310,13 +310,13 @@ pub fn ui_llm_settings(ui: &mut Ui, st: &mut SettingsState, chat: &mut ChatDockS
                     });
 
                 let key_status = if chat.cfg.provider.is_local(&chat.cfg.base_url) {
-                    "Lokal — kein API-Key erforderlich."
+                    "Lokal - kein API-Key erforderlich."
                 } else if !chat.cfg.api_key.trim().is_empty() {
                     "BYOK-Key eingetragen."
                 } else if resolve_api_key(&chat.cfg).is_some() {
                     "Env-Key automatisch erkannt (leer lassen ok)."
                 } else {
-                    "Kein API-Key gefunden — bitte BYOK eingeben oder Env-Key setzen."
+                    "Kein API-Key gefunden - bitte BYOK eingeben oder Env-Key setzen."
                 };
                 ui.label(RichText::new(key_status).small().weak());
 

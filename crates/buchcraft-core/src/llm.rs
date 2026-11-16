@@ -754,7 +754,7 @@ pub fn call_llm_turn(
 
     let raw = String::from_utf8_lossy(&output.stdout).to_string();
     let v: Value = serde_json::from_str(&raw)
-        .map_err(|e| format!("Invalid JSON from provider: {e} — raw: {raw}"))?;
+        .map_err(|e| format!("Invalid JSON from provider: {e} - raw: {raw}"))?;
 
     if let Some(err) = v.get("error") {
         return Err(format!("Provider error: {err}"));
