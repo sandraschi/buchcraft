@@ -9,16 +9,6 @@
 ![MCP stdio](https://img.shields.io/badge/MCP-stdio-purple)
 ![ArtCraft harness](https://img.shields.io/badge/ArtCraft-harness-green)
 
-## Install
-
-Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
-```
-
-Installs the Windows app, the CLI, and the MCP bundle.
-
 Austrian double-entry bookkeeping as a local-first craft app. Pure Rust,
 SQLite (WAL), one binary that is both a CLI and an MCP server. Part of the
 back-office craft suite (plan: `mcp-central-docs/projects/craft-fleet-expansion/BACKOFFICE_CRAFT_SUITE.md`).
@@ -31,6 +21,16 @@ Registrierkasse (RKSV) and does no payroll.
 - What it is for and where it stops: [docs/PRD.md](docs/PRD.md)
 - Every MCP tool: [docs/TOOLS.md](docs/TOOLS.md) (generated, checked by a test)
 - Changes: [CHANGELOG.md](CHANGELOG.md)
+
+## Install
+
+Tell Cursor, Claude, Antigravity, or OpenCode: **Install this.**
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-craft.ps1
+```
+
+Installs the Windows app and the CLI (Start Menu shortcut, CLI on the user PATH). `-RegisterClients` also registers the MCP exe with the IDEs that are installed. `-Clients cursor,claude-desktop` limits that list. `-Mcpb` installs the Claude Desktop extension bundle.
 
 ## What is real in v0.2.1
 
